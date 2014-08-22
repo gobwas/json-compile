@@ -1,4 +1,4 @@
-# [json](http://json.org)-compiler
+# [json](http://json.org)-compile
 
 > Compiles references in given json file into single structure
 
@@ -33,7 +33,7 @@ Inside your program you could get compiled config with `json-compile` module:
 var compile = require("json-compile"),
     path    = require("path");
 
-compiler.compile(path.resolve("./to/my/config.json"), function(config) {
+compiler.compile(path.resolve("./dir/base/extension.json"), function(err, config) {
     console.log(typeof config); // object
     console.log(config); // { "host": "127.0.0.1", "port": "8080", "name": "json-compile" }
 });
