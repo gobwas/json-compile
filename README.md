@@ -33,7 +33,7 @@ Inside your program you could get compiled config with `json-compile` module:
 var compile = require("json-compile"),
     path    = require("path");
 
-compiler.compile(path.resolve("./dir/base/extension.json"), function(err, config) {
+compile(path.resolve(__dirname, "./dir/base/extension.json"), function(err, config) {
     console.log(typeof config); // object
     console.log(config); // { "host": "127.0.0.1", "port": "8080", "name": "json-compile" }
 });
