@@ -1,0 +1,6 @@
+{
+    "$ref": "./nick.json",
+    "location": {
+        "$ref": "../location.json#/full"
+    }
+}

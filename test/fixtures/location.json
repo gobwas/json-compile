@@ -1,0 +1,10 @@
+{
+    "place": {
+        "country": "Russia",
+        "name": "Moscow"
+    },
+    "full": {
+        "$ref": "#/place",
+        "planet": "Earth"
+    }
+}

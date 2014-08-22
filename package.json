@@ -1,0 +1,37 @@
+{
+    "name": "json-compile",
+    "version": "0.1.0",
+    "description": "Compiles references in json",
+    "main": "./src/compile.js",
+    "keywords": [
+        "json",
+        "inheritance",
+        "$ref",
+        "compile",
+        "extend"
+    ],
+    "directories": {
+        "test": "test"
+    },
+    "scripts": {
+        "test": "mocha ./test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/gobwas/json-compile.git"
+    },
+    "author": "Sergey Kamardin <gobwas@gmail.com>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/gobwas/json-compile/issues"
+    },
+    "homepage": "https://github.com/gobwas/json-compile",
+    "devDependencies": {
+        "lodash": "^2.4.1",
+        "mocha": "^1.21.4",
+        "chai": "^1.9.1"
+    },
+    "dependencies": {
+        "json-pointer": "^0.2.1"
+    }
+}
