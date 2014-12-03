@@ -51,4 +51,26 @@ describe("compile", function() {
         });
     });
 
+    it("should merge properties if they are exists in both files", function(done) {
+        compile(path.resolve(__dirname, "./fixtures/merge/extension.json"), function(err, obj) {
+            var error;
+
+            if (err) {
+                done(err);
+                return;
+            }
+
+            try {
+                expect(obj).to.be.an('object');
+                expect(obj).to.have.property('property').that.is.an('object');
+                expect(obj.property).to.have.property('b', 2);
+                expect(obj.property).to.have.property('a', 1);
+            } catch (err) {
+                error = err;
+            }
+
+            done(error);
+        });
+    });
+
 });

@@ -1,5 +1,8 @@
 # [json](http://json.org)-compile
 
+[![npm version](https://badge.fury.io/js/json-compile.svg)](http://badge.fury.io/js/json-compile)
+[![Build Status](https://travis-ci.org/gobwas/json-compile.svg?branch=master)](https://travis-ci.org/gobwas/json-compile)
+
 > Compiles references in given json file into single structure
 
 ## Overview
@@ -58,8 +61,9 @@ Options.
 
 Property     | Necessary | Type       | Description
 -------------|-----------|------------|---------------------
-[basedir]    | no        | `String`   | Path to directory, where to find for relatively given path.
+[basedir]    | no        | `string`   | Path to directory, where to find for relatively given path.
 [loader]     | no        | `Function` | Loader for output references. Default uses `fs` module. Has signature `(path, callback)`, where callback is `callback(err, contents)`
+[merge]      | no        | `boolean`  | Merge or not properties, if they are `Object`. Default to `true`.
 
 #### callback
 

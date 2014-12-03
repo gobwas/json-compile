@@ -1,0 +1,6 @@
+{
+	"$ref": "../merge.json",
+	"property": {
+		"b": 2
+	}
+}

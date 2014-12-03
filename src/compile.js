@@ -43,21 +43,28 @@ function parseReference(reference) {
 function noop(){}
 
 function extend(obj) {
-    var extensions, extension, i, key, value;
+    var extensions, extension, i, key, value, existingValue, customize;
 
     extensions = Array.prototype.slice.call(arguments, 1);
+
+    if (!isFunction(extensions[extensions.length - 1])) {
+        customize = function(a, b) {
+            return b;
+        }
+    } else {
+        customize = extensions.pop();
+    }
 
     for (i = 0; i < extensions.length; i++) {
         extension = extensions[i];
 
         for (key in extension) if (extension.hasOwnProperty(key)) {
-            value = extension[key];
-            obj[key] = value;
+            obj[key] = customize(obj[key], extension[key]);
         }
     }
 
     return obj;
-}
+};
 
 function _each(obj, iterator) {
     var key, value;
@@ -162,84 +169,98 @@ function group(obj, grouper, done) {
     );
 }
 
-function walker(obj, resolver, done, root, result) {
-    result = result || {};
-    root = root || obj;
+function walker(options) {
+    var customize;
 
-    group(obj,
-        function(value, key, next) {
-            var parsed;
+    customize = function deep(a, b) {
+        return ( options.merge && isObject(a) && isObject(b) ) ? extend({}, a, b, deep) : b;
+    };
+    
+    return function walk(obj, resolver, done, root, result) {
+        result = result || {};
+        root = root || obj;
 
-            if (isObject(value)) {
-                walker(value, resolver, function(err, obj) {
-                    if (err) {
-                        next(err);
-                        return;
-                    }
+        group(obj,
+            function(value, key, next) {
+                var parsed;
 
-                    result[key] = obj;
-                    next();
-                }, root);
-                return;
-            }
-
-            if (isReference(key)) {
-                parsed = parseReference(value);
-
-                next(null, {
-                    group: parsed.outer ? "outer" : "inner",
-                    value: function(done) {
-                        resolver(value, root, function(err, obj) {
-                            if (err) {
-                                done(err);
-                                return;
-                            }
-
-                            extend(result, extend({}, obj, result));
-
-                            done();
-                        });
-                    }
-                });
-                return;
-            }
-
-            result[key] = value;
-            next();
-        },
-        function(err, refs) {
-            if (err) {
-                done(err);
-                return;
-            }
-
-            each(refs.outer,
-                function(rslv, key, next) {
-                    rslv(next);
-                },
-                function(err) {
-                    if (err) {
-                        done(err);
-                        return;
-                    }
-
-                    each(refs.inner,
-                        function(rslv, key, next) {
-                            rslv(next);
-                        },
-                        function(err) {
-                            if (err) {
-                                done(err);
-                                return;
-                            }
-
-                            done(null, result);
+                if (isObject(value)) {
+                    walk(value, resolver, function(err, obj) {
+                        if (err) {
+                            next(err);
+                            return;
                         }
-                    );
+
+                        result[key] = obj;
+                        next();
+                    }, root);
+                    return;
                 }
-            );
-        }
-    );
+
+                if (isReference(key)) {
+                    parsed = parseReference(value);
+
+                    next(null, {
+                        group: parsed.outer ? "outer" : "inner",
+                        value: function(done) {
+                            resolver(value, root, function(err, obj) {
+                                var extension;
+
+                                if (err) {
+                                    done(err);
+                                    return;
+                                }
+
+                                // construction `extend({}, obj, result)` brings us functionality
+                                // to add JUST non-existing properties
+                                extension = extend({}, obj, result, customize);
+
+                                extend(result, extension);
+                                
+                                done();
+                            });
+                        }
+                    });
+                    return;
+                }
+
+                result[key] = value;
+                next();
+            },
+            function(err, refs) {
+                if (err) {
+                    done(err);
+                    return;
+                }
+
+                each(refs.outer,
+                    function(rslv, key, next) {
+                        rslv(next);
+                    },
+                    function(err) {
+                        if (err) {
+                            done(err);
+                            return;
+                        }
+
+                        each(refs.inner,
+                            function(rslv, key, next) {
+                                rslv(next);
+                            },
+                            function(err) {
+                                if (err) {
+                                    done(err);
+                                    return;
+                                }
+
+                                done(null, result);
+                            }
+                        );
+                    }
+                );
+            }
+        );
+    };
 }
 
 function fsLoader(file, done) {
@@ -254,10 +275,14 @@ function compile(file, options, done) {
         options = undefined;
     }
 
-    options = options || {};
+    options = extend({
+        basedir: path.dirname(file),
+        loader:  fsLoader,
+        merge:   true
+    }, options || {});
 
-    basedir = options.basedir || path.dirname(file);
-    loader  = options.loader || fsLoader;
+    basedir = options.basedir;
+    loader  = options.loader;
 
     loader(path.resolve(basedir, file), function(err, contents) {
         var json;
@@ -274,7 +299,7 @@ function compile(file, options, done) {
             return;
         }
 
-        walker(json,
+        walker(options)(json,
             function(reference, json, done) {
                 var parsed;
 
