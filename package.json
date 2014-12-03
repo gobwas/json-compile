@@ -1,6 +1,6 @@
 {
     "name": "json-compile",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Compiles references in json",
     "main": "./src/compile.js",
     "keywords": [

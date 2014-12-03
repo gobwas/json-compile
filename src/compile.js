@@ -268,7 +268,7 @@ function fsLoader(file, done) {
 }
 
 function compile(file, options, done) {
-    var basedir, loader;
+    var basedir, loader, filepath, fileDir;
 
     if (isFunction(options)) {
         done = options;
@@ -283,6 +283,9 @@ function compile(file, options, done) {
 
     basedir = options.basedir;
     loader  = options.loader;
+
+    filepath = path.resolve(basedir, file);
+    fileDir = path.dirname(filepath);
 
     loader(path.resolve(basedir, file), function(err, contents) {
         var json;
@@ -306,7 +309,7 @@ function compile(file, options, done) {
                 parsed = parseReference(reference);
 
                 if (parsed.outer) {
-                    compile(parsed.outer, extend({}, options, { basedir: basedir }), function(err, json) {
+                    compile(parsed.outer, extend({}, options, { basedir: fileDir }), function(err, json) {
                         if (err) {
                             done(err);
                             return;
